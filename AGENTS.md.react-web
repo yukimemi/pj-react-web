@@ -19,13 +19,28 @@ this file.
 
 ### Dev server reachability
 
-`vite.config.ts` sets `server.host = true` and allows `.ts.net`,
+`vite.config.ts` is `when = "once"` (consumer territory — see
+`template.toml` for why), so the starter we ship is just a
+seed. The seed sets `server.host = true` and allows `.ts.net`,
 `.local`, and `localhost` so Tailscale and LAN previews work
-without a per-project tweak. If a project uses a non-Tailscale
-remote-preview domain (e.g. ngrok), append it via a project-side
-override after `kata apply` — the file is owned-always but
-extending the array is the kind of change that goes upstream
-to `pj-react-web` rather than living locally.
+out of the box.
+
+**Convention for every PJ on this layer**: keep the Tailscale
+allowlist in `server.allowedHosts`. Even if you rewrite
+`vite.config.ts` for plugins (VitePWA, Sentry, …), preserve at
+minimum:
+
+```ts
+server: {
+  host: true,
+  allowedHosts: [".ts.net", ".local", "localhost"],
+},
+```
+
+Without it the dev server rejects Tailscale / mDNS hosts with
+"Blocked request" and remote previews silently break. There's
+no automated guard for this since the file is consumer-owned —
+treat it as a checklist item when touching `vite.config.ts`.
 
 ### Tailwind
 

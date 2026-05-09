@@ -24,13 +24,23 @@ src = "tsconfig.node.json"
 how = "overwrite"
 when = "always"
 
-# Vite config — enables react plugin and (importantly for
-# yukimemi/*) opens the dev server to .ts.net / .local hosts so
-# Tailscale + LAN previews work without a per-project tweak.
+# Vite config — `vite.config.ts` is consumer-owned territory in
+# practice (each PJ stacks its own plugins: VitePWA, Sentry,
+# vitest config inheritance, custom dev-only loggers, …). We
+# can't keep it `always`-managed without clobbering those
+# extensions on every `kata apply`, and TS isn't a structured
+# format that `merge-toml` / `merge-yaml` could splice safely.
+#
+# So this layer ships an opinionated starter (`react()` plugin
+# + `host: true` + `.ts.net` / `.local` allowlist for Tailscale
+# / LAN previews) as `when = "once"`. The Tailscale allowlist
+# is the one bit consumers should *re-apply by hand* if they
+# rewrite this file from scratch — see AGENTS.md.react-web for
+# the convention.
 [[file]]
 src = "vite.config.ts"
 how = "overwrite"
-when = "always"
+when = "once"
 
 # Tailwind + PostCSS. tailwind.config.js stays `when = "once"`
 # so per-project theme extensions (custom colours, fontFamily,
