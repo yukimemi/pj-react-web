@@ -1,0 +1,63 @@
+## Vite + React + Tailwind layer (kata: pj-react-web)
+
+This block is owned by `yukimemi/pj-react-web` and re-applied on
+every `kata apply`. Edits go upstream to the template, not to
+this file.
+
+### Stack
+
+- **Vite** as the dev server / bundler.
+- **React 19** with the `react-jsx` runtime (no `import React`).
+- **TypeScript** project-references via the `pj-pnpm` root
+  `tsconfig.json` → `tsconfig.app.json` (browser) +
+  `tsconfig.node.json` (vite config / scripts).
+- **Tailwind v3** + PostCSS + autoprefixer.
+- **ESLint flat config** with `@eslint/js` recommended,
+  `typescript-eslint` recommended, `eslint-plugin-react-hooks`,
+  `eslint-plugin-react-refresh` (vite preset).
+- **Vitest** for tests (`pnpm test` / `pnpm test:watch`).
+
+### Dev server reachability
+
+`vite.config.ts` sets `server.host = true` and allows `.ts.net`,
+`.local`, and `localhost` so Tailscale and LAN previews work
+without a per-project tweak. If a project uses a non-Tailscale
+remote-preview domain (e.g. ngrok), append it via a project-side
+override after `kata apply` — the file is owned-always but
+extending the array is the kind of change that goes upstream
+to `pj-react-web` rather than living locally.
+
+### Tailwind
+
+- `tailwind.config.js` is `when = "once"` — per-project theme
+  extensions (custom colours, fontFamily, keyframes) survive
+  `kata apply`.
+- The shared baseline only sets `content` so Tailwind picks up
+  `index.html` and `src/**/*.{ts,tsx}`. Add fonts / colours /
+  shadows to the project's own copy.
+
+### `src/` skeleton
+
+- `main.tsx`, `App.tsx`, `index.css`, `vite-env.d.ts` are all
+  `when = "once"` placeholders — they boot a working "Hello"
+  page after init and are otherwise free for the project to
+  rewrite.
+
+### Required deps
+
+The framework layer doesn't ship a populated `package.json` (the
+`pj-pnpm` layer ships an empty-deps scaffold instead). After
+`kata init`, run:
+
+```sh
+pnpm add react react-dom
+pnpm add -D vite @vitejs/plugin-react typescript \
+  @types/react @types/react-dom @types/node \
+  tailwindcss postcss autoprefixer \
+  eslint typescript-eslint @eslint/js globals \
+  eslint-plugin-react-hooks eslint-plugin-react-refresh \
+  vitest
+```
+
+Pin majors to whatever the `kakeizu` reference project is using
+when starting a new repo.

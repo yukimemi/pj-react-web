@@ -1,0 +1,100 @@
+name = "pj-react-web"
+version = "0.1.0"
+
+# Vite + React + TypeScript + Tailwind framework layer. Sits above
+# `pj-pnpm` (which supplies package.json / pnpm scripts) and adds
+# the Vite/React/Tailwind/Vitest scaffolding plus a minimal
+# `src/` skeleton suitable for `pnpm dev` to boot a working page.
+#
+# Compose order: pj-base → pj-pnpm → pj-react-web. Conflicts on
+# tsconfig.json etc. resolve in this layer's favour because it
+# composes later.
+
+# tsconfig.app.json — browser-side TS config. Owned-by-kata so the
+# yukimemi/* React projects type-check uniformly.
+[[file]]
+src = "tsconfig.app.json"
+how = "overwrite"
+when = "always"
+
+# tsconfig.node.json — config for vite.config.ts and any
+# node-side scripts.
+[[file]]
+src = "tsconfig.node.json"
+how = "overwrite"
+when = "always"
+
+# Vite config — enables react plugin and (importantly for
+# yukimemi/*) opens the dev server to .ts.net / .local hosts so
+# Tailscale + LAN previews work without a per-project tweak.
+[[file]]
+src = "vite.config.ts"
+how = "overwrite"
+when = "always"
+
+# Tailwind + PostCSS. tailwind.config.js stays `when = "once"`
+# so per-project theme extensions (custom colours, fontFamily,
+# keyframes) don't get reverted; postcss.config.js is static and
+# safe to overwrite.
+[[file]]
+src = "postcss.config.js"
+how = "overwrite"
+when = "always"
+
+[[file]]
+src = "tailwind.config.js"
+how = "overwrite"
+when = "once"
+
+# ESLint flat config — recommended JS + TS rules + react-hooks +
+# react-refresh. Once-only because individual projects often add
+# their own ignore patterns / custom rules.
+[[file]]
+src = "eslint.config.js"
+how = "overwrite"
+when = "once"
+
+# index.html — Tera-rendered for the <title>. Once-only so the
+# consumer's <head> tweaks (preconnect, fonts, OG tags) survive.
+[[file]]
+src = "index.html.tera"
+dst = "index.html"
+how = "overwrite"
+when = "once"
+
+# Minimal browser entry skeleton — `pnpm dev` boots a working page
+# straight after init. All `when = "once"` so consumer code is
+# never overwritten.
+[[file]]
+src = "src/main.tsx"
+how = "overwrite"
+when = "once"
+
+[[file]]
+src = "src/App.tsx"
+how = "overwrite"
+when = "once"
+
+[[file]]
+src = "src/index.css"
+how = "overwrite"
+when = "once"
+
+[[file]]
+src = "src/vite-env.d.ts"
+how = "overwrite"
+when = "once"
+
+# Public assets — placeholder favicon. once-only.
+[[file]]
+src = "public/favicon.svg"
+how = "overwrite"
+when = "once"
+
+# React-web-layer agent guidance.
+[[file]]
+src = "AGENTS.md.react-web"
+dst = "AGENTS.md"
+how = "merge-section"
+when = "always"
+marker = { begin = "<!-- kata:agents:react-web:begin -->", end = "<!-- kata:agents:react-web:end -->" }
