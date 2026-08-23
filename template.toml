@@ -1,5 +1,5 @@
 name = "pj-react-web"
-version = "0.1.0"
+version = "0.2.0"
 
 # Vite + React + TypeScript + Tailwind framework layer. Sits above
 # `pj-pnpm` (which supplies package.json / pnpm scripts) and adds
@@ -10,19 +10,39 @@ version = "0.1.0"
 # tsconfig.json etc. resolve in this layer's favour because it
 # composes later.
 
-# tsconfig.app.json — browser-side TS config. Owned-by-kata so the
-# React projects using these templates type-check uniformly.
+# tsconfig.app.json — browser-side TS config. The `compilerOptions`
+# block is the part worth keeping uniform across the React projects
+# using these templates, but `include` is not: it is a statement
+# about the consumer's own directory layout. A project that keeps a
+# `shared/` directory consumed by both the browser and the server
+# half needs `["src", "shared"]` here, and kata has no way to know
+# that. Managing this file `always` reverted exactly that array on
+# every `kata apply`, silently dropping whole directories out of the
+# type-check.
+#
+# `merge-json` with `paths = ["compilerOptions"]` would be the
+# surgical fix, but kata's merge-json parses both sides with strict
+# `serde_json` and this file carries JSONC comments (`/* Bundler
+# mode */`, `/* Linting */`), so it would fail the apply outright.
+# Hence `when = "once"`: ship the opinionated starter, then leave it
+# to the consumer.
 [[file]]
 src = "tsconfig.app.json"
 how = "overwrite"
-when = "always"
+when = "once"
 
-# tsconfig.node.json — config for vite.config.ts and any
-# node-side scripts.
+# tsconfig.node.json — config for vite.config.ts and any node-side
+# scripts. `when = "once"` for the same reason as tsconfig.app.json:
+# its `include` array is the consumer's inventory of everything that
+# is not browser code — an `api/` directory of server routes, extra
+# build or codegen scripts, the `shared/` directory again — and this
+# layer only knows about `vite.config.ts`. Reverting the array here
+# stopped type-checking the entire server half of a consumer project.
+# JSONC comments rule out the merge-json alternative here too.
 [[file]]
 src = "tsconfig.node.json"
 how = "overwrite"
-when = "always"
+when = "once"
 
 # Vite config — `vite.config.ts` is consumer-owned territory in
 # practice (each PJ stacks its own plugins: VitePWA, Sentry,
